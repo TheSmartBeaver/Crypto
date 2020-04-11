@@ -79,6 +79,29 @@ public class Diversification {
         affiche_la_clef(W, longueur_de_la_clef_etendue);
 	}
 
+	public static byte[] generateClefLongue() {
+		String clef = "2b7e151628aed2a6abf7158809cf4f3c"; //TODO:Enlever après pour mettre d'autre clés
+        /*if (args.length == 0) {
+            System.out.println("Usage: java Diversification <clef en hexadécimal>");
+            System.exit(1);
+        }*/
+
+		longueur_de_la_clef = clef.length()/2;
+
+		if ( (longueur_de_la_clef!=16) && (longueur_de_la_clef!=24) && (longueur_de_la_clef != 32) ) {
+			System.out.println("Usage: java Diversification <clef en hexadécimal>");
+			System.out.println("\t Une clef AES est formée de 32, 48, ou 64 chiffres,");
+			System.out.println("\t c'est-à-dire 128, 192, ou 256 bits.");
+			exit(1);
+		}
+
+		calcule_la_clef_courte(clef);     // Fonction décodant la clef courte K
+		calcule_la_clef_etendue();          // Fonction calculant la clef longue W
+
+		affiche_la_clef(W, longueur_de_la_clef_etendue);
+		return W;
+	}
+
 	public static void calcule_la_clef_courte(String clef) { // À modifier !
     	/*On convertit la string en byte[]*/
     	byte[] clef_brute = Utils.hexStringToByteArray(clef);

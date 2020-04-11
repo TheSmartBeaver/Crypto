@@ -1,13 +1,17 @@
 // -*- coding: utf-8 -*-
 
+import static java.lang.System.exit;
+import static java.lang.System.setOut;
+
 public class Aes {
 
 	/* La clef courte K utilisée aujourd'hui est formée de 16 octets nuls */
 	int longueur_de_la_clef = 16 ;
-	byte K[] = {
+	static byte K[] = {
         (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
         (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00
     } ;
+
 
 	/* Résultat du TP précédent : diversification de la clef courte K en une clef étendue W */
 
@@ -15,7 +19,7 @@ public class Aes {
 	static int Nk = 4;
 	int longueur_de_la_clef_etendue = 176;
 
-	public byte W[] = { 
+	public byte W[] = {
         (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
         (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
         (byte)0x62, (byte)0x63, (byte)0x63, (byte)0x63, (byte)0x62, (byte)0x63, (byte)0x63, (byte)0x63,
@@ -42,18 +46,39 @@ public class Aes {
 
 	/* Le bloc à chiffrer aujourd'hui: 16 octets nuls */
 
-	public byte State[] = {
+	/*public byte State[] = {
         (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
         (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00
+    };*/
+
+    public byte State[] = {
+            (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
+            (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF
     };
 
 
 	/* Programme principal */
 
+    public void afficherUneRonde(byte[] a){
+        for (int i=0; i<16; i++){
+            if (i%4==0) System.out.println();
+            System.out.print(a[i]);
+        }
+    }
+
+
+
 	public static void main(String args[]) {
-		Aes aes = new Aes() ;
+		Aes aes = new Aes();
+		//W = Diversification.generateClefLongue();
+        System.out.println("La première ronde de la clé étendu :");
+        aes.afficher_le_bloc(aes.getRond(1));
         System.out.println("Le bloc \"State\" en entrée vaut : ") ;
         aes.afficher_le_bloc(aes.State) ;
+        aes.AddRoundKey(1);
+        System.out.println();
+        aes.afficher_le_bloc(aes.State) ;
+        exit(1);
         aes.chiffrer() ;
         System.out.println("Le bloc \"State\" en sortie vaut : ") ;
         aes.afficher_le_bloc(aes.State) ;
@@ -139,13 +164,66 @@ public class Aes {
 
 	/* Partie à compléter pour ce TP */
 
-	public void SubBytes(){}
-	
-	public void ShiftRows(){}
-	
-	public void MixColumns(){}
-	
-	public void AddRoundKey(int r){}
+    public byte[] getRond(int r){
+        byte[] a = new byte[16];
+        for (int i=0; i<16; i++){
+            a[i] = W[i+r*16];
+        }
+        return a;
+    }
+
+	public void AddRoundKey(int r){
+        byte a[] = getRond(r);
+        for(int i=0; i<16; i++){
+            State[i] = Utils.XORTwoBytes(a[i],State[i]);
+        }
+    }
+
+    public void SubBytes(){
+        for(int i = 0; i <= State.length - 1; i++){
+            State[i] = SBox[State[i]];
+        }
+    }
+
+    public void ShiftRows(){
+        byte t[] = new byte[State.length];
+
+        for(int i = 0; i <= State.length - 1; i++){
+            t[i] = State[i];
+        }
+
+        t[1] = State[5];
+        t[5] = State[9];
+        t[9] = State[13];
+        t[13] = State[1];
+
+        t[2] = State[10];
+        t[6] = State[14];
+        t[10] = State[2];
+        t[14] = State[6];
+
+        t[3] = State[15];
+        t[7] = State[3];
+        t[11] = State[7];
+        t[15] = State[11];
+
+        for(int i = 0; i <= t.length - 1; i++){
+            State[i] = t[i];
+        }
+    }
+
+    public void MixColumns(){
+	    byte b[] = new byte[4];
+        //byte a[] = new byte[4];
+        for(int i=0; i<4; i++) {
+           byte[] a = {State[0+4*i],State[1+4*i],State[2+4*i],State[3+4*i]};
+
+            State[0+4*i] = (byte) (gmul(a[0], (byte) 0x02) ^ gmul(a[1], (byte) 0x03) ^ gmul(a[2], (byte) 0x01) ^ gmul(a[3], (byte) 0x01));
+            State[1+4*i] = (byte) (gmul(a[0], (byte) 0x01) ^ gmul(a[1], (byte) 0x02) ^ gmul(a[2], (byte) 0x03) ^ gmul(a[3], (byte) 0x01));
+            State[2+4*i] = (byte) (gmul(a[0], (byte) 0x01) ^ gmul(a[1], (byte) 0x01) ^ gmul(a[2], (byte) 0x02) ^ gmul(a[3], (byte) 0x03));
+            State[3+4*i] = (byte) (gmul(a[0], (byte) 0x03) ^ gmul(a[1], (byte) 0x01) ^ gmul(a[2], (byte) 0x01) ^ gmul(a[3], (byte) 0x02));
+        }
+    }
 }
 
 /*
