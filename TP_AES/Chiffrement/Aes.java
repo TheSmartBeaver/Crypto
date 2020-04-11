@@ -52,9 +52,9 @@ public class Aes {
     };*/
 
     public byte State[] = {
-            (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
-            (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF
-    };
+            (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
+            (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00
+    } ;
 
 
 	/* Programme principal */
@@ -70,15 +70,12 @@ public class Aes {
 
 	public static void main(String args[]) {
 		Aes aes = new Aes();
-		//W = Diversification.generateClefLongue();
-        System.out.println("La première ronde de la clé étendu :");
-        aes.afficher_le_bloc(aes.getRond(1));
+        //System.out.println("LOL" +aes.SBox[0xC6]); //TODO: Enlever exit
+        System.out.println(Utils.byte_bijonction_int((byte)0xff));
+        System.out.println("taille SBOX :"+aes.SBox.length);
+        //exit(1);
         System.out.println("Le bloc \"State\" en entrée vaut : ") ;
         aes.afficher_le_bloc(aes.State) ;
-        aes.AddRoundKey(1);
-        System.out.println();
-        aes.afficher_le_bloc(aes.State) ;
-        exit(1);
         aes.chiffrer() ;
         System.out.println("Le bloc \"State\" en sortie vaut : ") ;
         aes.afficher_le_bloc(aes.State) ;
@@ -97,6 +94,7 @@ public class Aes {
 	public void chiffrer(){
         AddRoundKey(0);
         for (int i = 1; i < Nr; i++) {
+            System.out.println("i de chiffrer :"+i);
             SubBytes();
             ShiftRows();
             MixColumns();
@@ -179,9 +177,15 @@ public class Aes {
         }
     }
 
-    public void SubBytes(){
-        for(int i = 0; i <= State.length - 1; i++){
-            State[i] = SBox[State[i]];
+    public void SubBytes(){//TODO: blem avec octet commençant par une lettre -> -58 IL FAUT POUVOIR ASSIGNER UN NOMBRE POUR UN OCTET. TROUVER une bijonction
+        System.out.println("State avant SubBytes");
+        afficher_le_bloc(State);
+        int state_index;
+        for(int i = 0; i<State.length; i++){
+            state_index = Utils.byte_bijonction_int(State[i]);
+            System.out.println(i+" "+state_index); System.out.print(String.format("%02X ", State[i]));
+            State[i] = SBox[state_index]; /*Bizarre comme fonction ?????*/
+            afficher_le_bloc(State);
         }
     }
 

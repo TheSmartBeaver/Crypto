@@ -2,6 +2,7 @@ import java.io.*;
 import java.security.MessageDigest;
 
 import static java.lang.System.exit;
+import static java.lang.System.setOut;
 
 public class Utils {
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
@@ -14,6 +15,16 @@ public class Utils {
             hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    public static int byte_bijonction_int(byte b){
+        int v = b & 0xFF;
+        char[] c = new char[2];
+        c[0] = HEX_ARRAY[v >>> 4];
+        c[1] = HEX_ARRAY[v & 0x0F];
+        System.out.println("CHARAC :"+c[0]+c[1]);
+
+        return (halfByteToNumber(c[0])*16)+halfByteToNumber(c[1]);
     }
 
     public static byte[] hexStringToByteArray(String s) {
