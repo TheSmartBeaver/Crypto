@@ -33,7 +33,7 @@ public class Utils {
         char[] c = new char[2];
         c[0] = HEX_ARRAY[v >>> 4];
         c[1] = HEX_ARRAY[v & 0x0F];
-        System.out.println("CHARAC :"+c[0]+c[1]);
+        //System.out.println("CHARAC :"+c[0]+c[1]);
 
         return (halfByteToNumber(c[0])*16)+halfByteToNumber(c[1]);
     }
