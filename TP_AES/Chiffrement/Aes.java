@@ -114,24 +114,23 @@ public class Aes {
         }
     }
 
+    /**
+     *
+     * @param bytesOfFile les bytes du fichier bourré en PKCS5
+     * @param taille_bloc 16 pour l'AES
+     * @return les bytes du fichier crypté AES CBC PKCS5
+     */
     public byte[] chiffrer_CBC(byte[] bytesOfFile, int taille_bloc){
         int nb_bytes_fic = bytesOfFile.length;
         int nb_blocs = nb_bytes_fic/taille_bloc;
 	    byte[] result = new byte[nb_bytes_fic];
 
-	    //Utils.copyColumn(xorBlocs(State, get_n_bloc_of_BytesArray(bytesOfFile,0,16)),State);
-        //copyInArrayAtPos(State, result, Nr, 16);
-        Utils.copyColumn(xorBlocs(get_n_bloc_of_BytesArray(bytesOfFile,0,16),State),State);
-        chiffrer();
-        copyInArrayAtPos(State,result,0,16);
-
-        for(int i=1; i<nb_blocs; i++){
+        for(int i=0; i<nb_blocs; i++){
             System.out.println("NUM blocs "+i+" nb blocs :"+nb_blocs);
             Utils.copyColumn(xorBlocs(get_n_bloc_of_BytesArray(bytesOfFile,i,16),State),State);
             chiffrer();
             copyInArrayAtPos(State,result,i,16);
         }
-
         return result;
     }
 
