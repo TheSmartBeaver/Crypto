@@ -58,7 +58,6 @@ public class RSA_raw {
         d = randomNumber;
         //TODO: TROUVER e tq d*e = 1 (mod w)
         BigInteger paire[] = new BigInteger[2];
-        gcd = euclideEtendu(d,w,paire); /*Toujours égal à 1*/
         System.out.println("solution modulo correcte =1 ? "+ (d.multiply(paire[0])).add(w.multiply(paire[1])));
         System.out.println("Nos paires : " + paire[0] + "\n" + paire[1]);
         e = paire[1];
@@ -125,6 +124,33 @@ public class RSA_raw {
 
         /*TODO: On produit em soit le message m avec bourrage PKCS1*/
         byte[] em = PKCS1.getPkcs1_Of(m);
+        System.out.println("NOTRE MESSAGE em : "+toHex(em));
+
+        /*On convertit le message façon os2ip*/
+        code = os2ip_Message(em);
+
+        /* Affichage des clefs utilisées */
+        System.out.println("Clef publique (n) : " + n);
+        System.out.println("Clef publique (e) : " + e);
+        System.out.println("Clef privée (d)   : " + d);
+
+        /* On effectue d'abord le chiffrement RSA du code clair avec la clef publique */
+        codeChiffré = code.modPow(e, n);
+        System.out.println("Code chiffré      : " + codeChiffré);
+
+        byte[] crypted_in_RSA = codeChiffré.toByteArray();
+        System.out.println("La taille du chiffré est de " + crypted_in_RSA.length);
+
+        return crypted_in_RSA;
+    }
+
+    public static byte[] encryptInRSA_message_WithFollowingModules(byte[] message, BigInteger n_mod, BigInteger e_mod) throws IOException {
+        n = n_mod; e = e_mod;
+
+        System.out.println("Message clair      : " + toHex(message) );
+
+        /*TODO: On produit em soit le message m avec bourrage PKCS1*/
+        byte[] em = PKCS1.getPkcs1_Of(message);
         System.out.println("NOTRE MESSAGE em : "+toHex(em));
 
         /*On convertit le message façon os2ip*/

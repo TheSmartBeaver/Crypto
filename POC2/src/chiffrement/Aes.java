@@ -2,9 +2,13 @@ package chiffrement;
 
 // -*- coding: utf-8 -*-
 
+import diversification.Diversification;
 import jdk.jshell.execution.Util;
 
 import java.io.File;
+import java.security.SecureRandom;
+import java.util.concurrent.ThreadLocalRandom;
+
 import utils.Utils;
 import bourrage.PKCS5;
 
@@ -70,6 +74,16 @@ public class Aes {
     //TODO: tester validité avec : openssl enc -aes-128-cbc -K 0 -iv 0 -in butokuden.jpg > butokuden_c.jpg
     //TODO: md5sum butokuden_c.jpg
 
+    public static String generateRandomAES_key16(){
+        String result = "";
+
+        for (int i = 0 ; i < 16 ; ++i) {
+            byte b =(byte) ThreadLocalRandom.current().nextInt(256);
+            result += String.format("%02X", b);
+        }
+        return result;
+    }
+
     public static void main(String args[]) {
         Aes aes = new Aes();
         //System.out.println("LOL" +aes.SBox[0xC6]); //TODO: Enlever exit
@@ -79,8 +93,10 @@ public class Aes {
         System.out.println("Le bloc \"State\" en entrée vaut : ") ;
         aes.afficher_le_bloc(aes.State) ;
         //aes.chiffrer();
+        String clef_aes_courte = generateRandomAES_key16();
+        aes.W = Diversification.generateClefLongue(clef_aes_courte);
 
-        byte[] to_be_written_in_file = aes.chiffrer_CBC(PKCS5.getPkcs5OfFile("butokuden.jpg",16),16);
+        byte[] to_be_written_in_file = aes.chiffrer_CBC(PKCS5.getPkcs5OfFile("butokuden.jpg",16),16,aes.W);
         System.out.println("Le bloc \"State\" en sortie vaut : ") ;
         aes.afficher_le_bloc(aes.State) ;
 
@@ -124,7 +140,13 @@ public class Aes {
      * @param taille_bloc 16 pour l'AES
      * @return les bytes du fichier crypté AES CBC PKCS5
      */
-    public byte[] chiffrer_CBC(byte[] bytesOfFile, int taille_bloc){
+    public byte[] chiffrer_CBC(byte[] bytesOfFile, int taille_bloc, byte[] clef_etendu){
+        //TODO: Choisir aléatoirement un vecteur d'initialisation
+        byte[] IV_alea = new byte[16];
+        SecureRandom alea = new SecureRandom();
+        alea.nextBytes(IV_alea);
+        W=clef_etendu; //TODO: Enlever si je veux continuer à corriger CBC
+
         int nb_bytes_fic = bytesOfFile.length;
         int nb_blocs = nb_bytes_fic/taille_bloc;
         byte[] result = new byte[nb_bytes_fic];

@@ -1,4 +1,7 @@
+import chiffrement.Aes;
 import chiffrement.RSA_raw;
+import diversification.Diversification;
+import utils.Utils;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -14,6 +17,7 @@ import java.security.*;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class POC2 {
 
@@ -26,10 +30,21 @@ public class POC2 {
         return null;
     }
 
+    public static String generateRandomAES_key16(){
+        String result = "";
+
+        for (int i = 0 ; i < 16 ; ++i) {
+            byte b =(byte) ThreadLocalRandom.current().nextInt(256);
+            result += String.format("%02X", b);
+        }
+        return result;
+    }
+
     public static void crypt() {
         /*Génération clefs AES*/
         SecureRandom alea = new SecureRandom();
 
+        //TODO: On peut utiliser ça directement pour générer aléatoirement une clé AES
         byte[] clef = new byte[16];
         alea.nextBytes(clef);
         SecretKeySpec secretKey = new SecretKeySpec(clef, "AES");
@@ -45,6 +60,7 @@ public class POC2 {
         BigInteger public_exposant = new BigInteger(e, 16);
 
         byte[] buffer = secretKey.getEncoded();
+        System.out.println("La clé secrète du SecretKeySpec a une taille de "+buffer.length);
 
         try {
             KeyFactory RSAKeyUsine = KeyFactory.getInstance("RSA");
@@ -55,15 +71,24 @@ public class POC2 {
             //cipher.init(Cipher.ENCRYPT_MODE, public_key);
             //byte[] encryptedKey_cipherData = cipher.doFinal(secretKey.getEncoded());
             //:TODO remodifier pour donner la clé à coder
-            byte[] encryptedKey_cipherData = RSA_raw.encryptInRSA();
+
+            String clef_aes_courte = generateRandomAES_key16();
+            byte[] clef_aes_etendu = Diversification.generateClefLongue(clef_aes_courte);
+            System.out.println("La clé étendu fait " );
+            byte[] encryptedKey_cipherData = RSA_raw.encryptInRSA_message_WithFollowingModules(clef_aes_courte.getBytes(),public_module,public_exposant);
 
             System.out.println(encryptedKey_cipherData.length); /*Taille de 128 bits*/
+
+            System.out.println("Voici la clé AES utilisé "+clef_aes_courte+" taille de string :" +clef_aes_courte.length());
 
             //cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             //SecretKeySpec encryptedKey = new SecretKeySpec(encryptedKey_cipherData,"AES");
             //cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(initialisation_vector));
             //byte[] encryptedFile_cipherData = cipher.doFinal(getBytesOfFile("POC1/butokuden.jpg"));
-            byte[] encryptedFile_cipherData = new byte[1];
+
+            Aes aes = new Aes();
+            //TODO:Rajouter clef AES dans algo
+            byte[] encryptedFile_cipherData = aes.chiffrer_CBC(Utils.getBytesOfFile("butokuden.jpg"),16,clef_aes_etendu);
 
 
             FileOutputStream output = new FileOutputStream("output.jpg", true);

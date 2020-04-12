@@ -83,12 +83,8 @@ public class Diversification {
         affiche_la_clef(W, longueur_de_la_clef_etendue);
     }
 
-    public static byte[] generateClefLongue() {
-        String clef = "2b7e151628aed2a6abf7158809cf4f3c"; //TODO:Enlever après pour mettre d'autre clés
-        /*if (args.length == 0) {
-            System.out.println("Usage: java Diversification <clef en hexadécimal>");
-            System.exit(1);
-        }*/
+    public static byte[] generateClefLongue(String clef) {
+        //String clef = "2b7e151628aed2a6abf7158809cf4f3c"; //TODO:Enlever après pour mettre d'autre clés
 
         longueur_de_la_clef = clef.length()/2;
 
