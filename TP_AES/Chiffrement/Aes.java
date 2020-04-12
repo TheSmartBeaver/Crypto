@@ -127,7 +127,7 @@ public class Aes {
 
         for(int i=1; i<nb_blocs; i++){
             System.out.println("NUM blocs "+i+" nb blocs :"+nb_blocs);
-            Utils.copyColumn(xorBlocs(get_n_bloc_of_BytesArray(bytesOfFile,0,16),State),State);
+            Utils.copyColumn(xorBlocs(get_n_bloc_of_BytesArray(bytesOfFile,i,16),State),State);
             chiffrer();
             copyInArrayAtPos(State,result,i,16);
         }
