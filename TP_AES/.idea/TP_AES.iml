@@ -5,6 +5,8 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/Chiffrement" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Diversification" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Bourrage" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/OperatoryMode" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

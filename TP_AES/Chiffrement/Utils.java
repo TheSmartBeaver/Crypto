@@ -1,4 +1,6 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 
 import static java.lang.System.exit;
@@ -6,6 +8,15 @@ import static java.lang.System.setOut;
 
 public class Utils {
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
+
+    public static byte[] getBytesOfFile(String path){
+        try {
+            return Files.readAllBytes(Paths.get(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
@@ -77,6 +88,12 @@ public class Utils {
 
         catch (Exception e) {
             System.out.println("Exception: " + e);
+        }
+    }
+
+    public static void copyColumn(byte[] src, byte[] dest){
+        for(int i=0; i<4;i++){
+            dest[i] = src[i];
         }
     }
 

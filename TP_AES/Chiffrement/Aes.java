@@ -1,5 +1,9 @@
 // -*- coding: utf-8 -*-
 
+import jdk.jshell.execution.Util;
+
+import java.io.File;
+
 import static java.lang.System.exit;
 import static java.lang.System.setOut;
 
@@ -59,14 +63,8 @@ public class Aes {
 
 	/* Programme principal */
 
-    public void afficherUneRonde(byte[] a){
-        for (int i=0; i<16; i++){
-            if (i%4==0) System.out.println();
-            System.out.print(a[i]);
-        }
-    }
-
-
+    //TODO: tester validité avec : openssl enc -aes-128-cbc -K 0 -iv 0 -in butokuden.jpg > butokuden_c.jpg
+    //TODO: md5sum butokuden_c.jpg
 
 	public static void main(String args[]) {
 		Aes aes = new Aes();
@@ -76,9 +74,14 @@ public class Aes {
         //exit(1);
         System.out.println("Le bloc \"State\" en entrée vaut : ") ;
         aes.afficher_le_bloc(aes.State) ;
-        aes.chiffrer() ;
+        //aes.chiffrer();
+
+        byte[] to_be_written_in_file = aes.chiffrer_CBC(PKCS5.getPkcs5OfFile("butokuden.jpg",16),16);
         System.out.println("Le bloc \"State\" en sortie vaut : ") ;
         aes.afficher_le_bloc(aes.State) ;
+
+        File sortie = new File("sortie_PCKCS5_CBC.jpg");
+        Utils.writeBytesInFile(to_be_written_in_file, sortie);
 	}
 
 	public void afficher_le_bloc(byte M[]) {
@@ -104,6 +107,45 @@ public class Aes {
         ShiftRows();
         AddRoundKey(Nr);
 	}
+
+	public void copyInArrayAtPos(byte[] array_src, byte[] array_dest, int pos, int taille_bloc){
+        for (int i=0; i<taille_bloc; i++){
+            array_dest[i+pos*taille_bloc] = array_src[i];
+        }
+    }
+
+    public byte[] chiffrer_CBC(byte[] bytesOfFile, int taille_bloc){
+        int nb_bytes_fic = bytesOfFile.length;
+        int nb_blocs = nb_bytes_fic/taille_bloc;
+	    byte[] result = new byte[nb_bytes_fic];
+
+	    Utils.copyColumn(xorBlocs(State, get_n_bloc_of_BytesArray(bytesOfFile,0,16)),State);
+        AddRoundKey(0);
+        copyInArrayAtPos(State, result, 0, 16);
+        for (int i = 1; i < Nr; i++) {
+            System.out.println("i de chiffrer :"+i);
+            Utils.copyColumn(xorBlocs(State, get_n_bloc_of_BytesArray(bytesOfFile,i,16)),State);
+            SubBytes();
+            ShiftRows();
+            MixColumns();
+            AddRoundKey(i);
+            copyInArrayAtPos(State, result, i, 16);
+        }
+        Utils.copyColumn(xorBlocs(State, get_n_bloc_of_BytesArray(bytesOfFile,Nr,16)),State);
+        SubBytes();
+        ShiftRows();
+        AddRoundKey(Nr);
+        copyInArrayAtPos(State, result, Nr, 16);
+
+        return result;
+    }
+
+    public byte[] xorBlocs(byte[] a, byte[] b){
+        byte[] result = new byte[a.length];
+        for (int i=0; i<a.length; i++)
+            result[i] = Utils.XORTwoBytes(a[i],b[i]);
+        return result;
+    }
 
 	/* Table de substitution déjà utilisée lors du TP précédent */
 
@@ -166,6 +208,14 @@ public class Aes {
         byte[] a = new byte[16];
         for (int i=0; i<16; i++){
             a[i] = W[i+r*16];
+        }
+        return a;
+    }
+
+    public byte[] get_n_bloc_of_BytesArray(byte[] array, int pos, int taille_bloc){
+        byte[] a = new byte[taille_bloc];
+        for (int i=0; i<taille_bloc; i++){
+            a[i] = array[i+pos*taille_bloc];
         }
         return a;
     }
