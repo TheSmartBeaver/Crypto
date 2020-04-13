@@ -96,7 +96,7 @@ public class Aes {
         String clef_aes_courte = generateRandomAES_key16();
         aes.W = Diversification.generateClefLongue(clef_aes_courte);
 
-        byte[] to_be_written_in_file = aes.chiffrer_CBC(PKCS5.getPkcs5OfFile("butokuden.jpg",16),16,aes.W);
+        byte[] to_be_written_in_file = aes.chiffrer_CBC(PKCS5.getPkcs5OfFile("butokuden.jpg",16),16,aes.W,aes.State);
         System.out.println("Le bloc \"State\" en sortie vaut : ") ;
         aes.afficher_le_bloc(aes.State) ;
 
@@ -134,17 +134,9 @@ public class Aes {
         }
     }
 
-    /**
-     *
-     * @param bytesOfFile les bytes du fichier bourré en PKCS5
-     * @param taille_bloc 16 pour l'AES
-     * @return les bytes du fichier crypté AES CBC PKCS5
-     */
-    public byte[] chiffrer_CBC(byte[] bytesOfFile, int taille_bloc, byte[] clef_etendu){
-        //TODO: Choisir aléatoirement un vecteur d'initialisation
-        byte[] IV_alea = new byte[16];
-        SecureRandom alea = new SecureRandom();
-        alea.nextBytes(IV_alea);
+    public byte[] chiffrer_CBC(byte[] bytesOfFile, int taille_bloc, byte[] clef_etendu, byte[] IV){
+        State = IV;
+
         W=clef_etendu; //TODO: Enlever si je veux continuer à corriger CBC
 
         int nb_bytes_fic = bytesOfFile.length;
